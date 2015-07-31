@@ -32,5 +32,5 @@ func main() {
 	if !ok {
 		bail(1, "no such subcommand %s", os.Args[1])
 	}
-	cmd.handler(client)
+	cmd.handler(client, os.Args[2:]...)
 }
