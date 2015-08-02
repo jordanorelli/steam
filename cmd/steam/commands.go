@@ -86,6 +86,22 @@ func init() {
 				}
 			},
 		},
+		"dota-match-details": command{
+			handler: func(c *steam.Client, args ...string) {
+				if len(args) != 1 {
+					bail(1, "please provide exactly one match id")
+				}
+				id, err := strconv.ParseUint(args[0], 10, 64)
+				if err != nil {
+					bail(1, "bad match id: %s", err)
+				}
+				details, err := c.DotaMatchDetails(id)
+				if err != nil {
+					bail(1, "%v", err)
+				}
+                details.Display(os.Stdout)
+			},
+		},
 		"commands": command{
 			handler: func(c *steam.Client, args ...string) {
 				keys := make([]string, 0, len(commands))

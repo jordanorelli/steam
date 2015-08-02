@@ -106,6 +106,21 @@ func (c *Client) DotaMatchHistory() ([]DotaMatch, error) {
 	return response.V.Matches, nil
 }
 
+func (c *Client) DotaMatchDetails(id uint64) (*DotaMatchDetails, error) {
+	url := fmt.Sprintf("https://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/v0001/?key=%s&match_id=%d", c.key, id)
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, errorf(err, "unable to get match details")
+	}
+	var result struct {
+		V DotaMatchDetails `json:"result"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return nil, errorf(err, "unable to parse match details")
+	}
+	return &result.V, nil
+}
+
 /*
        "name": "ISteamUser",
        "methods": [
