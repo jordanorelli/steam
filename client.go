@@ -85,6 +85,27 @@ func (c *Client) GetPlayerSummaries(steamids ...uint64) ([]PlayerSummary, error)
 	return response.V.Players, nil
 }
 
+func (c *Client) DotaMatchHistory() ([]DotaMatch, error) {
+	url := fmt.Sprintf("https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=%s", c.key)
+	var response struct {
+		V struct {
+			Status     int         `json:"status"`
+			NumResults int         `json:"num_results"`
+			Total      int         `json:"total_results"`
+			Remaining  int         `json:"results_remaining"`
+			Matches    []DotaMatch `json:"matches"`
+		} `json:"result"`
+	}
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, errorf(err, "unable to get match history")
+	}
+	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+		return nil, errorf(err, "unable to parse match history response")
+	}
+	return response.V.Matches, nil
+}
+
 /*
        "name": "ISteamUser",
        "methods": [

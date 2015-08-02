@@ -73,6 +73,19 @@ func init() {
 				}
 			},
 		},
+		"dota-match-history": command{
+			handler: func(c *steam.Client, args ...string) {
+				matches, err := c.DotaMatchHistory()
+				if err != nil {
+					bail(1, "%v", err)
+				}
+				w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+				defer w.Flush()
+				for _, match := range matches {
+					fmt.Fprintln(w, match.Oneline())
+				}
+			},
+		},
 		"commands": command{
 			handler: func(c *steam.Client, args ...string) {
 				keys := make([]string, 0, len(commands))
