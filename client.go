@@ -1,6 +1,7 @@
 package steam
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -21,19 +22,47 @@ func (c *Client) Get(iface, method, version string) (*http.Response, error) {
 	return http.Get(url)
 }
 
-func (c *Client) GetFriendList(userid uint64) (*http.Response, error) {
+func (c *Client) GetFriendList(userid uint64) ([]PlayerFriend, error) {
 	url := fmt.Sprintf("https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=%s&steamid=%d", c.key, userid)
-	return http.Get(url)
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, errorf(err, "unable to get friend list")
+	}
+	var response struct {
+		V struct {
+			Friends []PlayerFriend `json:"friends"`
+		} `json:"friendslist"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+		return nil, errorf(err, "unable to parse friends list response")
+	}
+	return response.V.Friends, nil
 }
 
-func (c *Client) ResolveVanityUrl(vanity string) (*http.Response, error) {
+func (c *Client) ResolveVanityUrl(vanity string) (uint64, error) {
+	var v struct {
+		V struct {
+			Id      uint64 `json:"steamid,string"`
+			Success int    `json:"success"`
+		} `json:"response"`
+	}
 	url := fmt.Sprintf("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=%s&vanityurl=%s", c.key, vanity)
-	return http.Get(url)
+	res, err := http.Get(url)
+	if err != nil {
+		return 0, errorf(err, "unable to resolve vanity url")
+	}
+	if err := json.NewDecoder(res.Body).Decode(&v); err != nil {
+		return 0, errorf(err, "unable to decode vanity url response")
+	}
+	if v.V.Success != 1 {
+		return 0, errorf(err, "resolving vanity url returned non-1 status")
+	}
+	return v.V.Id, nil
 }
 
-func (c *Client) GetPlayerSummaries(steamids ...uint64) (*http.Response, error) {
+func (c *Client) GetPlayerSummaries(steamids ...uint64) ([]PlayerSummary, error) {
 	if len(steamids) > 100 {
-		return nil, fmt.Errorf("GetPlayerSummaries accepts a max of 100 ids, saw %d", len(steamids))
+		return nil, errorf(nil, "GetPlayerSummaries accepts a max of 100 ids, saw %d", len(steamids))
 	}
 	ids_s := make([]string, len(steamids))
 	for i := range steamids {
@@ -41,7 +70,19 @@ func (c *Client) GetPlayerSummaries(steamids ...uint64) (*http.Response, error) 
 	}
 	ids := strings.Join(ids_s, ",")
 	url := fmt.Sprintf("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=%s&steamids=%s", c.key, ids)
-	return http.Get(url)
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, errorf(err, "unable to call GetPlayerSummaries API")
+	}
+	var response struct {
+		V struct {
+			Players []PlayerSummary `json:"players"`
+		} `json:"response"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+		return nil, errorf(err, "unable to parse GetPlayerSummaries response")
+	}
+	return response.V.Players, nil
 }
 
 /*

@@ -8,6 +8,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"text/tabwriter"
 )
 
 var commands map[string]command
@@ -28,12 +29,24 @@ func init() {
 				if err != nil {
 					bail(1, "bad user id: %s", err)
 				}
-				dump(c.GetFriendList(userid))
+				friends, err := c.GetFriendList(userid)
+				if err != nil {
+					bail(1, "%v", err)
+				}
+				w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+				defer w.Flush()
+				for _, friend := range friends {
+					fmt.Fprintln(w, friend.Oneline())
+				}
 			},
 		},
 		"user-id": command{
 			handler: func(c *steam.Client, args ...string) {
-				dump(c.ResolveVanityUrl(args[0]))
+				userid, err := c.ResolveVanityUrl(args[0])
+				if err != nil {
+					bail(1, err.Error())
+				}
+				fmt.Println(userid)
 			},
 		},
 		"user-details": command{
@@ -49,7 +62,15 @@ func init() {
 					}
 					ids = append(ids, userid)
 				}
-				dump(c.GetPlayerSummaries(ids...))
+				players, err := c.GetPlayerSummaries(ids...)
+				if err != nil {
+					bail(1, "%v", err)
+				}
+				w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+				defer w.Flush()
+				for _, player := range players {
+					fmt.Fprintln(w, player.Oneline())
+				}
 			},
 		},
 		"commands": command{
