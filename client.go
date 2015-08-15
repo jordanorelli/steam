@@ -85,8 +85,44 @@ func (c *Client) GetPlayerSummaries(steamids ...uint64) ([]PlayerSummary, error)
 	return response.V.Players, nil
 }
 
-func (c *Client) DotaMatchHistory() ([]DotaMatch, error) {
+func (c *Client) DotaMatchSequence(lastId uint64, n int) ([]DotaMatch, error) {
+    // http://api.steampowered.com/IDOTA2Match_<ID>/GetMatchHistoryBySequenceNum/v1
+	url := fmt.Sprintf("https://api.steampowered.com/IDOTA2Match_570/GetMatchHistoryBySequenceNum/v1/?key=%s", c.key)
+	if lastId > 0 {
+		url = fmt.Sprintf("%s&start_at_match_seq_num=%d", url, lastId)
+	}
+	if n > 0 {
+		url = fmt.Sprintf("%s&matches_requested=%d", url, n)
+	}
+    fmt.Println(url)
+	var response struct {
+		V struct {
+			Status     int         `json:"status"`
+			NumResults int         `json:"num_results"`
+			Total      int         `json:"total_results"`
+			Remaining  int         `json:"results_remaining"`
+			Matches    []DotaMatch `json:"matches"`
+		} `json:"result"`
+	}
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, errorf(err, "unable to get match history")
+	}
+	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+		return nil, errorf(err, "unable to parse match history response")
+	}
+	return response.V.Matches, nil
+}
+
+func (c *Client) DotaMatchHistory(lastId uint64, n int) ([]DotaMatch, error) {
 	url := fmt.Sprintf("https://api.steampowered.com/IDOTA2Match_570/GetMatchHistory/v0001/?key=%s", c.key)
+	if lastId > 0 {
+		url = fmt.Sprintf("%s&last_match_id=%d", url, lastId)
+	}
+	if n > 0 {
+		url = fmt.Sprintf("%s&matches_requested=%d", url, n)
+	}
+    fmt.Println(url)
 	var response struct {
 		V struct {
 			Status     int         `json:"status"`
@@ -120,117 +156,3 @@ func (c *Client) DotaMatchDetails(id uint64) (*DotaMatchDetails, error) {
 	}
 	return &result.V, nil
 }
-
-/*
-       "name": "ISteamUser",
-       "methods": [
-           {
-               "name": "GetPlayerBans",
-               "version": 1,
-               "httpmethod": "GET",
-               "parameters": [
-                   {
-                       "name": "key",
-                       "type": "string",
-                       "optional": false,
-                       "description": "access key"
-                   },
-                   {
-                       "name": "steamids",
-                       "type": "string",
-                       "optional": false,
-                       "description": "Comma-delimited list of SteamIDs"
-                   }
-               ]
-
-           },
-           {
-               "name": "GetPlayerSummaries",
-               "version": 1,
-               "httpmethod": "GET",
-               "parameters": [
-                   {
-                       "name": "key",
-                       "type": "string",
-                       "optional": false,
-                       "description": "access key"
-                   },
-                   {
-                       "name": "steamids",
-                       "type": "string",
-                       "optional": false,
-                       "description": "Comma-delimited list of SteamIDs"
-                   }
-               ]
-
-           },
-           {
-               "name": "GetPlayerSummaries",
-               "version": 2,
-               "httpmethod": "GET",
-               "parameters": [
-                   {
-                       "name": "key",
-                       "type": "string",
-                       "optional": false,
-                       "description": "access key"
-                   },
-                   {
-                       "name": "steamids",
-                       "type": "string",
-                       "optional": false,
-                       "description": "Comma-delimited list of SteamIDs (max: 100)"
-                   }
-               ]
-
-           },
-           {
-               "name": "GetUserGroupList",
-               "version": 1,
-               "httpmethod": "GET",
-               "parameters": [
-                   {
-                       "name": "key",
-                       "type": "string",
-                       "optional": false,
-                       "description": "access key"
-                   },
-                   {
-                       "name": "steamid",
-                       "type": "uint64",
-                       "optional": false,
-                       "description": "SteamID of user"
-                   }
-               ]
-
-           },
-           {
-               "name": "ResolveVanityURL",
-               "version": 1,
-               "httpmethod": "GET",
-               "parameters": [
-                   {
-                       "name": "key",
-                       "type": "string",
-                       "optional": false,
-                       "description": "access key"
-                   },
-                   {
-                       "name": "vanityurl",
-                       "type": "string",
-                       "optional": false,
-                       "description": "The vanity URL to get a SteamID for"
-                   },
-                   {
-                       "name": "url_type",
-                       "type": "int32",
-                       "optional": true,
-                       "description": "The type of vanity URL. 1 (default): Individual profile, 2: Group, 3: Official game group"
-                   }
-               ]
-
-           }
-       ]
-
-   },
-*/

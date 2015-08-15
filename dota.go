@@ -12,7 +12,7 @@ type DotaMatch struct {
 	SeqNum        uint64            `json:"match_seq_num"`
 	StartTime     uint64            `json:"start_time"`
 	LobbyType     int               `json:"lobby_type"`
-	RadiantTeamId int               `json:"radian_team_id"`
+	RadiantTeamId int               `json:"radiant_team_id"`
 	DireTeamId    int               `json:"dire_team_id"`
 	Players       []DotaMatchPlayer `json:"players"`
 }

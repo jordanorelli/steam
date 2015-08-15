@@ -75,7 +75,7 @@ func init() {
 		},
 		"dota-match-history": command{
 			handler: func(c *steam.Client, args ...string) {
-				matches, err := c.DotaMatchHistory()
+				matches, err := c.DotaMatchHistory(0, 0)
 				if err != nil {
 					bail(1, "%v", err)
 				}
