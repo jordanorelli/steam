@@ -16,6 +16,7 @@ var commands map[string]command
 func init() {
 	commands = map[string]command{
 		"api-list":           cmd_api_list,
+		"api-interfaces":     cmd_api_interfaces,
 		"user-friends":       cmd_user_friends,
 		"user-id":            cmd_user_id,
 		"user-details":       cmd_user_details,
@@ -55,15 +56,6 @@ retrieves info about a specific command
 			},
 		},
 	}
-}
-
-var cmd_api_list = command{
-	help: `
-retrieves the list of currently supported api endpoints from steam
-`,
-	handler: func(c *steam.Client, args ...string) {
-		dump(c.Get("ISteamWebAPIUtil", "GetSupportedAPIList", "v0001"))
-	},
 }
 
 var cmd_user_friends = command{
