@@ -66,6 +66,13 @@ var cmd_api_methods = command{
 	help: `
 `,
 	handler: func(c *steam.Client, args ...string) {
+		var filter map[string]bool
+		if len(args) > 0 {
+			filter = make(map[string]bool, len(args))
+			for _, name := range args {
+				filter[name] = true
+			}
+		}
 		res, err := c.Get("ISteamWebAPIUtil", "GetSupportedAPIList", "v0001")
 		if err != nil {
 			bail(1, "error: %s", err)
@@ -79,6 +86,9 @@ var cmd_api_methods = command{
 		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 		defer w.Flush()
 		for _, i := range response.ApiList.Interfaces {
+			if filter != nil && !filter[i.Name] {
+				continue
+			}
 			for _, m := range i.Methods {
 				fmt.Fprintf(w, "%s\t%s\n", i.Name, m.Name)
 			}
