@@ -33,16 +33,43 @@ func init() {
 				}
 			},
 		},
+		"help": command{
+			help: `
+retrieves info about a specific command
+`,
+			handler: func(c *steam.Client, args ...string) {
+				switch len(args) {
+				case 0:
+					bail(1, "must provide the name of a command to get help about")
+				case 1:
+					break
+				default:
+					bail(1, "please provide just one command name to get help about")
+				}
+				name := args[0]
+				cmd, ok := commands[name]
+				if !ok {
+					bail(1, "no such command: %s", name)
+				}
+				fmt.Println(cmd.help)
+			},
+		},
 	}
 }
 
 var cmd_api_list = command{
+	help: `
+retrieves the list of currently supported api endpoints from steam
+`,
 	handler: func(c *steam.Client, args ...string) {
 		dump(c.Get("ISteamWebAPIUtil", "GetSupportedAPIList", "v0001"))
 	},
 }
 
 var cmd_user_friends = command{
+	help: `
+retrieves the provided user's list of friends
+`,
 	handler: func(c *steam.Client, args ...string) {
 		if len(args) < 1 {
 			bail(1, "please provide a user id")
@@ -64,6 +91,9 @@ var cmd_user_friends = command{
 }
 
 var cmd_user_id = command{
+	help: `
+given a user's vanity url, retrieves their steam user id
+`,
 	handler: func(c *steam.Client, args ...string) {
 		userid, err := c.ResolveVanityUrl(args[0])
 		if err != nil {
@@ -74,6 +104,9 @@ var cmd_user_id = command{
 }
 
 var cmd_user_details = command{
+	help: `
+given a user's steam id, retrieves their user details
+`,
 	handler: func(c *steam.Client, args ...string) {
 		if len(args) < 1 {
 			bail(1, "please provide a user id")
@@ -99,6 +132,7 @@ var cmd_user_details = command{
 }
 
 var cmd_dota_match_history = command{
+	help: ``,
 	handler: func(c *steam.Client, args ...string) {
 		matches, err := c.DotaMatchHistory(0, 0)
 		if err != nil {
@@ -113,6 +147,7 @@ var cmd_dota_match_history = command{
 }
 
 var cmd_dota_match_details = command{
+	help: ``,
 	handler: func(c *steam.Client, args ...string) {
 		if len(args) != 1 {
 			bail(1, "please provide exactly one match id")
@@ -130,6 +165,7 @@ var cmd_dota_match_details = command{
 }
 
 type command struct {
+	help    string
 	handler func(*steam.Client, ...string)
 }
 
