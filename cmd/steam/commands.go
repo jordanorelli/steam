@@ -18,6 +18,7 @@ func init() {
 		"api-list":           cmd_api_list,
 		"api-interfaces":     cmd_api_interfaces,
 		"api-methods":        cmd_api_methods,
+		"api-params":         cmd_api_params,
 		"user-friends":       cmd_user_friends,
 		"user-id":            cmd_user_id,
 		"user-details":       cmd_user_details,
