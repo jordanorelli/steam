@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jordanorelli/steam"
+	"os"
+	"text/tabwriter"
 )
 
 type ApiList struct {
@@ -56,6 +58,30 @@ retrieves the list of currently supported api interfaces from steam
 		}
 		for _, i := range response.ApiList.Interfaces {
 			fmt.Println(i.Name)
+		}
+	},
+}
+
+var cmd_api_methods = command{
+	help: `
+`,
+	handler: func(c *steam.Client, args ...string) {
+		res, err := c.Get("ISteamWebAPIUtil", "GetSupportedAPIList", "v0001")
+		if err != nil {
+			bail(1, "error: %s", err)
+		}
+		var response struct {
+			ApiList ApiList `json:"apilist"`
+		}
+		if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
+			bail(1, "error parsing response: %s", err)
+		}
+		w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
+		defer w.Flush()
+		for _, i := range response.ApiList.Interfaces {
+			for _, m := range i.Methods {
+				fmt.Fprintf(w, "%s\t%s\n", i.Name, m.Name)
+			}
 		}
 	},
 }

@@ -17,6 +17,7 @@ func init() {
 	commands = map[string]command{
 		"api-list":           cmd_api_list,
 		"api-interfaces":     cmd_api_interfaces,
+		"api-methods":        cmd_api_methods,
 		"user-friends":       cmd_user_friends,
 		"user-id":            cmd_user_id,
 		"user-details":       cmd_user_details,
