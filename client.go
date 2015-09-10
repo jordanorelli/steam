@@ -86,7 +86,7 @@ func (c *Client) GetPlayerSummaries(steamids ...uint64) ([]PlayerSummary, error)
 }
 
 func (c *Client) DotaMatchSequence(lastId uint64, n int) ([]DotaMatch, error) {
-    // http://api.steampowered.com/IDOTA2Match_<ID>/GetMatchHistoryBySequenceNum/v1
+	// http://api.steampowered.com/IDOTA2Match_<ID>/GetMatchHistoryBySequenceNum/v1
 	url := fmt.Sprintf("https://api.steampowered.com/IDOTA2Match_570/GetMatchHistoryBySequenceNum/v1/?key=%s", c.key)
 	if lastId > 0 {
 		url = fmt.Sprintf("%s&start_at_match_seq_num=%d", url, lastId)
@@ -94,7 +94,7 @@ func (c *Client) DotaMatchSequence(lastId uint64, n int) ([]DotaMatch, error) {
 	if n > 0 {
 		url = fmt.Sprintf("%s&matches_requested=%d", url, n)
 	}
-    fmt.Println(url)
+	fmt.Println(url)
 	var response struct {
 		V struct {
 			Status     int         `json:"status"`
@@ -122,7 +122,7 @@ func (c *Client) DotaMatchHistory(lastId uint64, n int) ([]DotaMatch, error) {
 	if n > 0 {
 		url = fmt.Sprintf("%s&matches_requested=%d", url, n)
 	}
-    fmt.Println(url)
+	fmt.Println(url)
 	var response struct {
 		V struct {
 			Status     int         `json:"status"`
