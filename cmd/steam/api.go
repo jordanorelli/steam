@@ -93,7 +93,7 @@ interfaces.
 				continue
 			}
 			for _, m := range i.Methods {
-				fmt.Fprintf(w, "%s\t%s\n", i.Name, m.Name)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%d\n", i.Name, m.Name, m.HttpMethod, m.Version)
 			}
 		}
 	},
@@ -139,7 +139,7 @@ retrieve all method parameters for the IDOTA2Match_570 method GetMatchDetails:
 					}
 				}
 				for _, p := range m.Params {
-					fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%t\t%s\n", i.Name, m.Name, p.Name, p.Type, p.Optional, p.Description)
+					fmt.Fprintf(w, "%s/%s/v%d\t%s\t%s\t%t\t%s\n", i.Name, m.Name, m.Version, p.Name, p.Type, p.Optional, p.Description)
 				}
 			}
 		}
